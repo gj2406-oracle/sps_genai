@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 WORKDIR /code
 
@@ -11,5 +11,6 @@ RUN uv sync --frozen
 RUN uv run python -m spacy download en_core_web_md
 
 COPY app ./app
+COPY cnn_model.pth ./cnn_model.pth
 
 CMD ["uv", "run", "fastapi", "run", "app/main.py", "--port", "80"]
