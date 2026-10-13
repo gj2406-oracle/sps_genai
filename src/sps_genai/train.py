@@ -1,28 +1,22 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision
-import torchvision.transforms as transforms
-
 from torch.utils.data import DataLoader
+from torchvision import datasets, transforms
+
 from sps_genai.cnn import SimpleCNN
 
 
-# CIFAR-10 classes
-CLASSES = (
-    "airplane", "automobile", "bird", "cat", "deer",
-    "dog", "frog", "horse", "ship", "truck"
-)
-
-
-# Convert images to tensors
+# Resize CIFAR10 images from 32x32 to 64x64
+# to match the CNN architecture required in the assignment
 transform = transforms.Compose([
+    transforms.Resize((64, 64)),
     transforms.ToTensor()
 ])
 
 
-# Load CIFAR-10 training data
-train_data = torchvision.datasets.CIFAR10(
+# Load CIFAR10 training dataset
+train_dataset = datasets.CIFAR10(
     root="./data",
     train=True,
     download=True,
@@ -30,45 +24,63 @@ train_data = torchvision.datasets.CIFAR10(
 )
 
 train_loader = DataLoader(
-    train_data,
-    batch_size=32,
+    train_dataset,
+    batch_size=64,
     shuffle=True
 )
 
 
-# Create the CNN
+# Create model
 model = SimpleCNN()
 
-# Loss function and optimizer
+# Loss function
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+# Optimizer
+optimizer = optim.Adam(
+    model.parameters(),
+    lr=0.001
+)
 
 
-# Train the model
-EPOCHS = 2
+# Training
+model.train()
 
-for epoch in range(EPOCHS):
+num_epochs = 2
+
+for epoch in range(num_epochs):
+
     running_loss = 0.0
 
     for images, labels in train_loader:
+
         optimizer.zero_grad()
 
         outputs = model(images)
+
         loss = criterion(outputs, labels)
 
         loss.backward()
+
         optimizer.step()
 
         running_loss += loss.item()
 
+    average_loss = running_loss / len(train_loader)
+
     print(
-        f"Epoch {epoch + 1}/{EPOCHS}, "
-        f"Loss: {running_loss / len(train_loader):.4f}"
+        f"Epoch {epoch + 1}/{num_epochs}, "
+        f"Loss: {average_loss:.4f}"
     )
 
 
-# Save trained model
-torch.save(model.state_dict(), "cnn_model.pth")
-
 print("Training finished.")
+
+
+# Save trained model
+torch.save(
+    model.state_dict(),
+    "cnn_model.pth"
+)
+
 print("Model saved as cnn_model.pth")

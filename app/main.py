@@ -45,14 +45,19 @@ CLASSES = (
     "dog", "frog", "horse", "ship", "truck"
 )
 
+
 # Load trained CNN
 cnn_model = SimpleCNN()
-cnn_model.load_state_dict(torch.load("cnn_model.pth", map_location="cpu"))
+cnn_model.load_state_dict(
+    torch.load("cnn_model.pth", map_location="cpu")
+)
 cnn_model.eval()
 
-# Images need to be 32 x 32 for CIFAR-10
+
+# Resize uploaded images to 64 x 64
+# to match the CNN architecture
 image_transform = transforms.Compose([
-    transforms.Resize((32, 32)),
+    transforms.Resize((64, 64)),
     transforms.ToTensor()
 ])
 
@@ -61,7 +66,10 @@ image_transform = transforms.Compose([
 async def predict_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
 
-    image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    image = Image.open(
+        io.BytesIO(image_bytes)
+    ).convert("RGB")
+
     image = image_transform(image)
     image = image.unsqueeze(0)
 

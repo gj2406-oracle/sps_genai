@@ -8,7 +8,7 @@ class SimpleCNN(nn.Module):
         super(SimpleCNN, self).__init__()
 
         self.conv1 = nn.Conv2d(
-            3, 16, kernel_size=3, padding=1
+            3, 16, kernel_size=3, stride=1, padding=1
         )
 
         self.pool = nn.MaxPool2d(
@@ -16,11 +16,11 @@ class SimpleCNN(nn.Module):
         )
 
         self.conv2 = nn.Conv2d(
-            16, 32, kernel_size=3, padding=1
+            16, 32, kernel_size=3, stride=1, padding=1
         )
 
-        self.fc1 = nn.Linear(32 * 8 * 8, 128)
-        self.fc2 = nn.Linear(128, 10)
+        self.fc1 = nn.Linear(32 * 16 * 16, 100)
+        self.fc2 = nn.Linear(100, 10)
 
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
