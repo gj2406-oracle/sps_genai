@@ -9,3 +9,10 @@ wheels/
 # Virtual environments
 .venv
 data/
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+Untitled.ipynb
+
+# Backup files
+app/main_backup.py

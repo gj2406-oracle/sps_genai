@@ -83,3 +83,35 @@ async def predict_image(file: UploadFile = File(...)):
         "filename": file.filename,
         "predicted_class": predicted_class
     }
+
+# GAN image generation
+from helper_lib.model import Generator
+from fastapi.responses import Response
+from torchvision.utils import save_image
+
+gan_generator = Generator()
+gan_generator.load_state_dict(
+    torch.load(
+        "gan_generator.pth",
+        map_location="cpu",
+        weights_only=True
+    )
+)
+gan_generator.eval()
+
+
+@app.get("/generate")
+def generate_image():
+    with torch.no_grad():
+        noise = torch.randn(1, 100)
+        fake_image = gan_generator(noise)
+
+    fake_image = (fake_image + 1) / 2
+
+    buffer = io.BytesIO()
+    save_image(fake_image, buffer, format="PNG")
+
+    return Response(
+        content=buffer.getvalue(),
+        media_type="image/png"
+    )
