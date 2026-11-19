@@ -115,3 +115,44 @@ def generate_image():
         content=buffer.getvalue(),
         media_type="image/png"
     )
+
+# Diffusion model image generation
+
+from src.sps_genai.diffusion_unet import SmallUNet, sample_unet
+
+diffusion_model = SmallUNet(timesteps=100)
+
+diffusion_model.load_state_dict(
+    torch.load(
+        "diffusion_unet_model_v2.pth",
+        map_location="cpu",
+        weights_only=True
+    )
+)
+
+diffusion_model.eval()
+
+
+@app.get("/generate/diffusion")
+def generate_diffusion_image():
+
+    with torch.no_grad():
+        generated_image = sample_unet(
+            diffusion_model,
+            batch_size=1,
+            device="cpu"
+        )
+
+    buffer = io.BytesIO()
+
+    save_image(
+        generated_image,
+        buffer,
+        format="PNG"
+    )
+
+    return Response(
+        content=buffer.getvalue(),
+        media_type="image/png"
+    )
+
